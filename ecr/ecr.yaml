@@ -1,0 +1,78 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Creates ECRs in the AWS CICD PROD Account
+Parameters:
+  AssetId:
+    Type: String
+    Description: The applications asset insight id.
+  ServiceName:
+    Type: String
+    Description: The name of the ECS Cluster.
+  CicdAccountId:
+    Type: String
+    Description: The account number for your CICD account.
+  PlexusAccountId:
+    Type: String
+    Description: The account number for your NON Prod account.
+
+Resources:
+  ECR:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "a${AssetId}-${ServiceName}"
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      EncryptionConfiguration:
+        EncryptionType: "KMS"
+      ImageTagMutability: "IMMUTABLE"
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: allowaccess
+            Effect: Allow
+            Principal:
+                AWS: !Sub arn:aws:iam::${CicdAccountId}:root
+            Action:
+              - ecr:GetDownloadUrlForLayer
+              - ecr:BatchGetImage
+              - ecr:BatchCheckLayerAvailability
+              - ecr:ListImages
+              - ecr:GetLifecyclePolicy
+              - ecr:GetLifecyclePolicyPreview
+              - ecr:DescribeRepositories
+              - ecr:DescribeImages
+              - ecr:GetRepositoryPolicy
+              - ecr:InitiateLayerUpload
+              - ecr:UploadLayerPart
+              - ecr:CompleteLayerUpload
+              - ecr:PutImage
+          - Sid: AllowPushPull
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${PlexusAccountId}:root
+            Action:
+              - "ecr:DescribeImages"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:PutImage"
+              - "ecr:InitiateLayerUpload"
+              - "ecr:UploadLayerPart"
+              - "ecr:CompleteLayerUpload"
+          - Sid: CrossAccountsReadAccess
+            Effect: Allow
+            Principal: 
+               AWS: !Sub arn:aws:iam::${CicdAccountId}:root
+            Action:
+              - "ecr:DescribeImages"
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:PutImage"
+              - "ecr:InitiateLayerUpload"
+              - "ecr:UploadLayerPart"
+              - "ecr:CompleteLayerUpload"
+Outputs:
+  ECRName:
+    Value: !Ref ECR

@@ -1,0 +1,54 @@
+version: 0.2
+env:
+  variables:
+    ARTIFACTORY_USERNAME: "a208551-asp-jfrog-publisher"
+    ECR_REPO: a208499-ach-backend-registry
+  secrets-manager:
+    ARTIFACTORY_PASSWORD: a208499-artifactory-credentials-s-cumulus-build:artifactory_password
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+
+  pre_build:
+    commands:
+      - ls -l && echo "Environment Variables:" && env
+      - echo "printing current working directory" 
+      - pwd && echo "Logging into artifactory."
+      - docker login tr1-docker.jfrog.io -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
+      - aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${CICD_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+
+      - echo "Install pre-requisites."
+      - pip3 install boto3 docker pyyaml
+      - apt-get install wget apt-transport-https gnupg
+      - wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -
+      - echo deb https://aquasecurity.github.io/trivy-repo/deb bionic main | tee -a /etc/apt/sources.list.d/trivy.list
+      - apt-get update
+      - apt-get install -y trivy
+
+      - add-apt-repository ppa:rmescandon/yq
+      - apt-get update && apt-get install yq
+      - pwd && ls -la
+      - cd python-app && pwd && ls -la
+      - app_release_version=demo-python-$(yq eval '.appVersion' ./helm/chart/ach-backend/Chart.yaml)
+      - chmod +x ./cicd/update_version_and_image.sh
+      - ./cicd/update_version_and_image.sh
+
+  build:
+    commands:
+      - echo "Starting Docker Build.." && pwd
+      - export DOCKER_BUILDKIT=1
+      - docker build . --tag ${ECR_REPO}:latest
+
+  post_build:
+    commands:     
+      - trivy image --severity HIGH,CRITICAL ${ECR_REPO}:latest
+      - python3 ./cicd/bake_helper.py --image ${ECR_REPO} --tag $app_release_version --param-path DeployerParameters.Helm.SetValues.tag
+      - pwd && ls -la
+      - cd .. && cp python-app/cicd/cumulus-deployspec.yaml . && cp -r python-app/helm/ .
+
+artifacts:
+  files:
+    - "helm/**/*"
+    - "cumulus-deployspec.yaml"

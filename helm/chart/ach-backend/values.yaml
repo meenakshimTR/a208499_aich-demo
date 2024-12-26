@@ -1,0 +1,57 @@
+# Default values for ach-pod-backend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "demo-python-serviceaccount"
+
+image:
+  repository: 606349626084.dkr.ecr.us-east-1.amazonaws.com/a208499-ach-backend-registry
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+  pullSecrets: []
+
+pod:
+  replicas: 2
+  annotations: {}
+  securityContext: {}
+  env: []
+  resources: {}
+  nodeSelector: { }
+  tolerations: [ ]
+
+service:
+  type: ClusterIP
+  port: 8080
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 60
+  # targetMemoryUtilizationPercentage: 80
+
+pdb:
+  maxUnavailable: "50%"
+
+gateway:
+  host: "localhost"
+  credentialName: ""
+
+virtualservice:
+  prefix: "/"
+
+authorization:
+  principals:
+    - cluster.local/ns/private-ingressgateway/sa/private-ingressgateway-service-account
+    - cluster.local/ns/public-ingressgateway/sa/public-ingressgateway-service-account

@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: demo
+spec:
+  gateways:
+    - "aich-gateway"
+  hosts:
+    - ai-concept-hub.plexus-ppe.1554.aws.thomsonreuters.com
+  http:
+    - name:  demo
+      match:
+        - uri:
+            prefix: "/demo"
+      route:
+        - destination:
+            host: demo
+            port:
+              number: 8080

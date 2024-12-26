@@ -1,0 +1,38 @@
+---
+Pipeline:
+  AssetId: '208499'
+  ResourceOwner: AICHDevopsEngineeringGroup@thomsonreuters.com
+  EnvironmentType: PRE-PRODUCTION
+  ServiceName: demo-python
+  GroupName: ach
+  ArtifactBucket: a208499-ach-cumulus-bucket
+  Notifications:
+    SnsArn: arn:aws:sns:us-east-1:606349626084:a208499-ach-bluegreen-resource-cleanup-topic
+    NotifyOn:
+      PipelineSuccess: true
+      PipelineFailure: true
+      DeploySuccess: true
+      DeployFailure: true
+
+Components:
+  Source:
+    Type: GitHub
+    Repo: a208499_asp-demo
+    Connection: a206264-github
+    Branch: main
+    Owner: tr
+    FullClone: false
+  Bake:
+    Type: BasicCodeBuild
+    BuildSpecLocation: ./python-app/cicd/cumulus-bakespec.yaml
+    EnvironmentVariables:
+      REGION: "us-east-1"
+      DESTINATION_ACCOUNT_ID: "674700511554"  # Destination account ID
+      CICD_ACCOUNT_ID: "606349626084" # SharedCap CICD Prod account ID
+      GITHUB_COMMIT_ID:
+        Value: '#{SourceVariables.CommitId}'
+        Type: PLAINTEXT
+      SERVICE_NAME: 'python'
+  Deploy:
+    - Environment: nonprod
+      DeployspecLocation: cumulus-deployspec.yaml

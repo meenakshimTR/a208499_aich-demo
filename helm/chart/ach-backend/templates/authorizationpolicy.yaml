@@ -1,0 +1,21 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: demo
+  labels:
+    helm.sh/chart: demo-0.0.1
+    app.kubernetes.io/name: demo
+    app.kubernetes.io/instance: demo
+    app.kubernetes.io/version: "appVersion"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: demo
+      app.kubernetes.io/instance: demo
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/private-ingressgateway/sa/private-ingressgateway-service-account
+              - cluster.local/ns/public-ingressgateway/sa/public-ingressgateway-service-account

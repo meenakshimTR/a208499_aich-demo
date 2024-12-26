@@ -1,0 +1,26 @@
+---
+Defaults:
+  DeployerType: simple_eks_deployer
+  AssetId: 208499
+  ServiceName: demo-python
+  EnvironmentType: PRE-PRODUCTION
+  ResourceOwner: AICHDevopsEngineeringGroup@thomsonreuters.com
+
+nonprod:
+  AccountId: "606349626084" # Deploying ECR to shared-cicd-prod
+  AccountRegion: us-east-1
+  DeployerParameters:
+    Helm:
+      RoleArn: arn:aws:iam::674700511554:role/human-role/a208499-PowerUser2
+      Release: demo-python
+      ValuesFiles:
+        - ../nonprod-values.yaml
+      SetValues:
+        tag: Value
+      ClusterName: a206215-preprod-plexus-main-1-plexus-cluster
+      Namespace: 208499-ai-concept-hub
+      HelmRoot: "helm/chart/ach-backend"
+      WaitMinutes: 15
+      Args:
+        - --debug
+        - --install
