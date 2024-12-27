@@ -9,7 +9,7 @@ def decodeJWT(token: str) -> dict:
     try:
         # Request the JWKS
         url = 'https://auth-nonprod.thomsonreuters.com/.well-known/jwks.json'
-        audience = 'faa81312-b677-405b-bd16-9381a2a6a845'
+        audience = 'd68a1574-bab6-4a34-bcc4-53103c513106'
         # url = os.environ["JWT_URL"]
         # audience =os.environ["JWT_AUDIENCE"]
         response = requests.get(url)
