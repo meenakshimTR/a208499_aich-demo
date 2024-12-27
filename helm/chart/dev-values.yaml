@@ -1,0 +1,23 @@
+image:
+  repository: "606349626084.dkr.ecr.us-east-1.amazonaws.com/a208499-ach-backend-registry"
+  tag: "appVersion"
+
+gateway:
+  host: ai-concept-hub-dev.plexus-ppe.1554.aws.thomsonreuters.com
+  credentialName: "public-ingress-certs"
+
+pod:
+  resources:
+    limits:
+      cpu: "3"
+      memory: 2Gi
+    requests:
+      cpu: "2"
+      memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 80
