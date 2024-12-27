@@ -17,7 +17,7 @@ Pipeline:
 Components:
   Source:
     Type: GitHub
-    Repo: a208499_asp-demo
+    Repo: a208499_aich-demo
     Connection: a206264-github
     Branch: main
     Owner: tr
@@ -34,5 +34,5 @@ Components:
         Type: PLAINTEXT
       SERVICE_NAME: 'python'
   Deploy:
-    - Environment: nonprod
+    - Environment: dev
       DeployspecLocation: cumulus-deployspec.yaml
